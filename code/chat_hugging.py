@@ -30,7 +30,6 @@
 # import os
 
 # # 1. Set your Hugging Face token (replace with your actual token)
-# HUGGINGFACEHUB_API_TOKEN = "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" 
 # os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
 
 # # 2. Initialize the LLM with a valid model
@@ -77,8 +76,7 @@ load_dotenv()
 # 2. Verify the token is loaded (optional debug step)
 
 """
-# To use this code, you need to create an .env file with the following content:
-HUGGINGFACEHUB_API_TOKEN = "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" """
+# To use this code, you need to create an .env file with the following content: """
 HUGGINGFACEHUB_API_TOKEN = os.environ.get('HUGGINGFACEHUB_API_TOKEN')
 print(f"Token loaded: {'****' + HUGGINGFACEHUB_API_TOKEN[-4:] if HUGGINGFACEHUB_API_TOKEN else 'NOT FOUND'}")
 
