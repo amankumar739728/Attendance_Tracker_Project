@@ -1,0 +1,8 @@
+2025-05-09 17:45:21,018 - DEBUG -- logger.py - 16 - Harmless debug Message
+2025-05-09 17:45:21,019 - INFO -- logger.py - 17 - Just an information
+2025-05-09 17:45:21,019 - WARNING -- logger.py - 18 - Its a Warning
+2025-05-09 17:45:21,019 - ERROR -- logger.py - 19 - Did you try to divide by zero
+2025-05-09 17:45:21,019 - CRITICAL -- logger.py - 20 - Internet is down
+
+2025-05-09 17:45:22,982 - INFO -- logger.py - 41 - Performing operation with value: 4
+2025-05-09 17:45:22,982 - INFO -- logger.py - 42 - Operation performed successfully.
