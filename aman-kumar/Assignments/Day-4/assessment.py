@@ -313,4 +313,90 @@ greet("Alice")
 
 # Calling function: greet
 # Hello, Alice!
+
+
+#(Question 13.): read and write to a file (using pathlib)
+#use open() method to read and write to a file and print the content of the file
+#handle exceptions using try and except if file not found
+
+    
+from pathlib import Path
+
+# Define the file path
+file_path = Path("example.txt")
+
+if not file_path.exists():
+    print(f"File '{file_path}' does not exist and will be created.")
+else:
+    print(f"File '{file_path}' already exists and will be overwritten.")
+
+# Write to the file (creates if it doesn't exist)
+try:
+    file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    with file_path.open("w", encoding="utf-8") as file:
+        file.write("Hello, this is a test file.\n")
+        file.write("This is the second line.\n")
+    print(f"Data written to {file_path.resolve()}")
+except Exception as e:
+    print(f"Error writing file: {e}")
+
+# Read from the file
+try:
+    with file_path.open("r", encoding="utf-8") as file:
+        content = file.read()
+        print(f"Content of {file_path}:\n{content}")
+except Exception as e:
+    print(f"Error reading file: {e}")
+
+
+#output:
+# File 'example.txt' does not exist and will be created.
+# Data written to C:\Users\AmanKumar\OneDrive - GyanSys Inc\Desktop\gs-upskill-python-2025\workarea\aman-kumar\Assignments\Day-4\example.txt
+# Content of example.txt:
+# Hello, this is a test file.
+# This is the second line.
+
+
+#(Question 14.): weather data using API
+#use requests module to get the data from OpenWeatherMap API
+#parse the JSON data and print the city name, temperature, humidity, and weather description
+#handle exceptions using try and except if API key is invalid or city not found
+import requests
+import json
+import os
+from dotenv import load_dotenv
+load_dotenv()
+# Load environment variables
+API_KEY = os.getenv("API_KEY")
+CITY = os.getenv("CITY")
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+
+try:
+    # Make a request to the OpenWeatherMap API
+    response = requests.get(BASE_URL, params={"q": CITY, "appid": API_KEY, "units": "metric"})
+    response.raise_for_status()  # Raise an error for bad responses
+
+    # Parse the JSON data
+    weather_data = response.json()
+
+    # Extract relevant information
+    city_name = weather_data["name"]
+    temperature = weather_data["main"]["temp"]
+    humidity = weather_data["main"]["humidity"]
+    weather_description = weather_data["weather"][0]["description"]
+
+    # Print the weather information
+    print(f"City: {city_name}")
+    print(f"Temperature: {temperature}°C")
+    print(f"Humidity: {humidity}%")
+    print(f"Weather Description: {weather_description}")
+
+except requests.exceptions.RequestException as e:
+    print(f"Error fetching weather data: {e}")
+except json.JSONDecodeError as e:
+    print(f"Error decoding JSON response: {e}")
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
+    
+    
     
