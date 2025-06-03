@@ -123,7 +123,7 @@ export default function UserManagement({ onLogout }) {
         setTimeout(() => setNotification(""), 4000);
         handleDialogClose();
       } else if (dialogType === 'register') {
-        const res = await fetch('http://localhost:9123/v1/user/register', {
+        const res = await fetch('https://attendance-tracker-project.onrender.com/v1/user/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form)
