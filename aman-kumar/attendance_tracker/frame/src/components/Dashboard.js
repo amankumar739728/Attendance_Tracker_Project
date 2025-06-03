@@ -327,7 +327,7 @@ export default function Dashboard({ onLogout }) {
         <Typography variant="h4" mb={3}>Dashboard</Typography>
         <Box display="flex" alignItems="center" gap={2}>
           {user && user.is_admin && (
-            <Button variant="outlined" onClick={() => window.location.href = '/users'}>Go to User Management</Button>
+            <Button variant="outlined" onClick={() => window.location.href = '#/users'}>Go to User Management</Button>
           )}
           <ProfileMenu onLogout={onLogout} />
         </Box>
