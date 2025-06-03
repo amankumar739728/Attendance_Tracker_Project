@@ -1,6 +1,5 @@
 {
   "name": "frame",
-  "proxy": "https://attendance-tracker-project-ui.onrender.com/",
   "homepage": "/",
   "version": "0.1.0",
   "private": true,
