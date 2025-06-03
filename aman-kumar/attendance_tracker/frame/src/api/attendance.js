@@ -1,6 +1,6 @@
 import { fetchWithAuth } from '../api/token';
 
-const API_BASE = 'http://localhost:9123/v1/user';
+const API_BASE = 'https://attendance-tracker-project.onrender.com/v1/user';
 
 export async function getAttendanceSummary(emp_id = '', summary_date = '') {
   let url = `${API_BASE}/attendance/daily-summary`;
