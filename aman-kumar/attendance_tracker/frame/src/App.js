@@ -10,6 +10,7 @@ import { UserUpdateProvider } from './components/UserUpdateContext';
 import ChangePassword from './components/ChangePassword';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import LandingPage from './components/LandingPage';
 import './App.css';
 
 function App() {
@@ -29,10 +30,11 @@ function App() {
     <UserUpdateProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={isLoggedIn ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/users" element={isLoggedIn ? <UserManagement onLogout={handleLogout} /> : <Navigate to="/login" />} />
+          <Route path="/dashboard" element={isLoggedIn ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/" />} />
+          <Route path="/users" element={isLoggedIn ? <UserManagement onLogout={handleLogout} /> : <Navigate to="/" />} />
           <Route path="/change-password" element={isLoggedIn ? <ChangePassword /> : <Navigate to="/login" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

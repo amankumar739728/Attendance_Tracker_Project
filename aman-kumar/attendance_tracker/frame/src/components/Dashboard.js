@@ -18,17 +18,14 @@ export default function Dashboard({ onLogout }) {
   const [error, setError] = useState('');
   const [filterEmpId, setFilterEmpId] = useState('');
   const [filterDate, setFilterDate] = useState('');
-  // For non-admins: form for emp_id/username and date
   const [userInput, setUserInput] = useState("");
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
-  const [mode, setMode] = useState('get'); // 'get' or 'delete'
+  const [mode, setMode] = useState('get');
   const [deleteEmpId, setDeleteEmpId] = useState('');
   const [deleteDate, setDeleteDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [punchLoading, setPunchLoading] = useState(false);
-  // Confirmation dialog state for delete attendance
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState({ open: false, empId: '' });
-  // Pagination and sorting for admin view
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
   let sortedAttendance = attendance;
@@ -37,7 +34,6 @@ export default function Dashboard({ onLogout }) {
   const { subscribe } = useUserUpdate();
 
   useEffect(() => {
-    // Set default date to today
     const today = format(new Date(), 'yyyy-MM-dd');
     setFilterDate(today);
     setDeleteDate(today);
@@ -46,7 +42,6 @@ export default function Dashboard({ onLogout }) {
 
   useEffect(() => {
     if (user) {
-      // Fetch attendance for today by default
       fetchAttendance(filterEmpId, filterDate || format(new Date(), 'yyyy-MM-dd'));
     }
     // eslint-disable-next-line
@@ -59,7 +54,6 @@ export default function Dashboard({ onLogout }) {
     }
   }, [location.state]);
 
-  // Subscribe to user update events to refresh user and attendance data
   useEffect(() => {
     const unsubscribe = subscribe(() => {
       getCurrentUser().then(setUser).then(() => {
@@ -77,20 +71,29 @@ export default function Dashboard({ onLogout }) {
     try {
       const data = await getAttendanceSummary(empId, date);
       if (!data || (Array.isArray(data) && data.length === 0)) {
-        setError(`No attendance record available for ${empId}. Please hit clear and try with available emp_id`);
+        setError(`No attendance records available for ${date}`);
         setAttendance([]);
       } else {
         setAttendance(data);
       }
     } catch (err) {
-      setError(`No attendance record available for ${empId}. Please hit clear and try with available emp_id`);
+      setError(`Failed to fetch attendance records for ${date}`);
       setAttendance(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Debounce function to limit frequency of function calls
+  const handleModeChange = (newMode) => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    setMode(newMode);
+    setFilterDate(today);
+    setDeleteDate(today);
+    setFilterEmpId('');
+    setDeleteEmpId('');
+    fetchAttendance("", today);
+  };
+
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -109,20 +112,16 @@ export default function Dashboard({ onLogout }) {
     }, 500)
   ).current;
 
-  // For non-admins: fetch attendance by emp_id or username
   const fetchAttendanceByInput = async (input, date) => {
     setLoading(true);
     setError("");
     try {
       let data;
       if (/^\d+$/.test(input)) {
-        // All digits: treat as emp_id
         data = await import('../api/attendance').then(api => api.getAttendanceByEmpId(input, date));
       } else {
-        // Otherwise, treat as username
         data = await import('../api/attendance').then(api => api.getAttendanceByUsername(input, date));
       }
-      // If backend returns access restriction message, show notification
       if (data && data.message && data.message.includes('Access restricted')) {
         setNotification({ open: true, message: data.message, severity: 'warning' });
         setAttendance(null);
@@ -147,7 +146,6 @@ export default function Dashboard({ onLogout }) {
     fetchAttendance(filterEmpId, filterDate);
   };
 
-  // When emp_id is cleared, auto-fetch all attendance for the date
   const handleEmpIdChange = (e) => {
     const value = e.target.value;
     setFilterEmpId(value);
@@ -161,7 +159,6 @@ export default function Dashboard({ onLogout }) {
   const handleDateChange = (e) => {
     const value = e.target.value;
     setFilterDate(value);
-    // Immediately fetch attendance for the new date
     fetchAttendance(filterEmpId, value);
   };
 
@@ -169,11 +166,11 @@ export default function Dashboard({ onLogout }) {
     const today = format(new Date(), 'yyyy-MM-dd');
     setFilterEmpId("");
     setFilterDate(today);
+    setDeleteDate(today);
     setError("");
     fetchAttendance("", today);
   };
 
-  // Non-admin filter handlers
   const handleNonAdminFilter = (e) => {
     e.preventDefault();
     setError("");
@@ -189,16 +186,13 @@ export default function Dashboard({ onLogout }) {
     const today = format(new Date(), 'yyyy-MM-dd');
     setFilterDate(today);
     setError("");
-    // Fetch current user's attendance for today
     if (user) {
       fetchAttendanceByInput(user.emp_id, today);
     }
   };
 
-  // Delete attendance handler
   const handleDeleteAttendance = async (e) => {
     e.preventDefault();
-    // Open confirmation dialog instead of deleting immediately
     setDeleteConfirmDialog({ open: true, empId: deleteEmpId });
   };
 
@@ -207,18 +201,19 @@ export default function Dashboard({ onLogout }) {
     setError('');
     try {
       await deleteAttendanceByEmpIdAndDay(deleteConfirmDialog.empId, deleteDate);
-      setNotification({ open: true, message: `Attendance for emp_id: ${deleteConfirmDialog.empId} is deleted for ${deleteDate}`, severity: 'success' });
+      setNotification({ 
+        open: true, 
+        message: `Attendance for emp_id: ${deleteConfirmDialog.empId} is deleted for ${deleteDate}`, 
+        severity: 'success' 
+      });
       setDeleteEmpId('');
-      // Refresh attendance data after deletion
-      if (user) {
-        if (user.is_admin) {
-          fetchAttendance(filterEmpId, filterDate);
-        } else {
-          fetchAttendanceByInput(user.emp_id, filterDate);
-        }
-      }
+      fetchAttendance("", deleteDate);
     } catch (err) {
-      setNotification({ open: true, message: 'Failed to delete attendance. Provide a valid emp_id', severity: 'error' });
+      setNotification({ 
+        open: true, 
+        message: 'Failed to delete attendance. Provide a valid emp_id', 
+        severity: 'error' 
+      });
     } finally {
       setDeleteLoading(false);
       setDeleteConfirmDialog({ open: false, empId: '' });
@@ -233,8 +228,11 @@ export default function Dashboard({ onLogout }) {
     setPunchLoading(true);
     try {
       await punchAttendance(action);
-      setNotification({ open: true, message: `Attendance ${action === 'IN' ? 'In Time' : 'Out Time'} punched successfully!`, severity: 'success' });
-      // Refresh attendance data after punch
+      setNotification({ 
+        open: true, 
+        message: `Attendance ${action === 'IN' ? 'In Time' : 'Out Time'} punched successfully!`, 
+        severity: 'success' 
+      });
       if (user) {
         if (user.is_admin) {
           fetchAttendance(filterEmpId, filterDate);
@@ -243,7 +241,11 @@ export default function Dashboard({ onLogout }) {
         }
       }
     } catch (err) {
-      setNotification({ open: true, message: `Failed to punch ${action === 'IN' ? 'In Time' : 'Out Time'}`, severity: 'error' });
+      setNotification({ 
+        open: true, 
+        message: `Failed to punch ${action === 'IN' ? 'In Time' : 'Out Time'}`, 
+        severity: 'error' 
+      });
     } finally {
       setPunchLoading(false);
     }
@@ -252,7 +254,6 @@ export default function Dashboard({ onLogout }) {
   useEffect(() => {
     if (location.state && location.state.showLoginSuccess && user) {
       setNotification({ open: true, message: `Logged in as ${user.username}.`, severity: 'success' });
-      // Remove the notification after 2 seconds
       setTimeout(() => setNotification({ open: false, message: '', severity: 'success' }), 2000);
     }
   }, [location.state, user]);
@@ -261,7 +262,6 @@ export default function Dashboard({ onLogout }) {
     sortedAttendance = [...attendance].sort((a, b) => {
       if (a.username === 'root') return -1;
       if (b.username === 'root') return 1;
-      // Numeric sort for emp_id if possible, else string
       const aEmp = isNaN(Number(a.emp_id)) ? a.emp_id : Number(a.emp_id);
       const bEmp = isNaN(Number(b.emp_id)) ? b.emp_id : Number(b.emp_id);
       if (aEmp < bEmp) return -1;
@@ -269,6 +269,7 @@ export default function Dashboard({ onLogout }) {
       return 0;
     });
   }
+
   const paginatedAttendance = user && user.is_admin && Array.isArray(sortedAttendance)
     ? sortedAttendance.slice((page - 1) * rowsPerPage, page * rowsPerPage)
     : sortedAttendance;
@@ -332,14 +333,12 @@ export default function Dashboard({ onLogout }) {
         </Box>
       </Box>
 
-      {/* Attendance label and punch buttons at the top */}
       <Box display="flex" alignItems="center" gap={2} mb={4}>
         <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>Attendance:</Typography>
         <Button variant="contained" color="success" onClick={() => handlePunch('IN')} disabled={punchLoading}>Punch In</Button>
         <Button variant="contained" color="warning" onClick={() => handlePunch('OUT')} disabled={punchLoading}>Punch Out</Button>
       </Box>
 
-      {/* Mode selector and filter controls */}
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         {user && user.is_admin && (
           <>
@@ -349,7 +348,7 @@ export default function Dashboard({ onLogout }) {
                 labelId="mode-select-label"
                 value={mode}
                 label="Mode"
-                onChange={e => setMode(e.target.value)}
+                onChange={(e) => handleModeChange(e.target.value)}
               >
                 <MenuItem value="get">Get</MenuItem>
                 <MenuItem value="delete">Delete</MenuItem>
@@ -365,10 +364,49 @@ export default function Dashboard({ onLogout }) {
             )}
             {mode === 'delete' && (
               <>
-                <TextField label="Employee ID" value={deleteEmpId} onChange={e => setDeleteEmpId(e.target.value)} size="small" required disabled={deleteLoading} />
-                <TextField label="Date" type="date" value={deleteDate} onChange={e => setDeleteDate(e.target.value)} size="small" InputLabelProps={{ shrink: true }} disabled={deleteLoading} required />
-                <Button type="button" variant="contained" color="error" onClick={handleDeleteAttendance} disabled={deleteLoading || !deleteEmpId}>Delete Attendance</Button>
-                <Button type="button" variant="outlined" onClick={() => setDeleteEmpId('')} disabled={deleteLoading}>Clear</Button>
+                <TextField 
+                  label="Employee ID" 
+                  value={deleteEmpId} 
+                  onChange={e => setDeleteEmpId(e.target.value)} 
+                  size="small" 
+                  required 
+                  disabled={deleteLoading} 
+                />
+                <TextField 
+                  label="Date" 
+                  type="date" 
+                  value={deleteDate} 
+                  onChange={e => {
+                    setDeleteDate(e.target.value);
+                    fetchAttendance("", e.target.value);
+                  }} 
+                  size="small" 
+                  InputLabelProps={{ shrink: true }} 
+                  disabled={deleteLoading} 
+                  required 
+                />
+                <Button 
+                  type="button" 
+                  variant="contained" 
+                  color="error" 
+                  onClick={handleDeleteAttendance} 
+                  disabled={deleteLoading || !deleteEmpId}
+                >
+                  Delete Attendance
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outlined" 
+                  onClick={() => {
+                    const today = format(new Date(), 'yyyy-MM-dd');
+                    setDeleteEmpId('');
+                    setDeleteDate(today);
+                    fetchAttendance("", today);
+                  }} 
+                  disabled={deleteLoading}
+                >
+                  Clear
+                </Button>
               </>
             )}
           </>
@@ -383,11 +421,10 @@ export default function Dashboard({ onLogout }) {
         )}
       </Box>
 
-      {/* Delete confirmation dialog */}
       <Dialog open={deleteConfirmDialog.open} onClose={cancelDeleteAttendance}>
         <DialogTitle>Delete Attendance</DialogTitle>
         <DialogContent>
-          <Typography>Do you want to delete attendance for employee ID: <b>{deleteConfirmDialog.empId}</b>?</Typography>
+          <Typography>Do you want to delete attendance for employee ID: <b>{deleteConfirmDialog.empId}</b> on <b>{deleteDate}</b>?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={cancelDeleteAttendance} color="primary">No</Button>
@@ -395,7 +432,6 @@ export default function Dashboard({ onLogout }) {
         </DialogActions>
       </Dialog>
 
-      {/* Attendance table */}
       {loading ? (
         <CircularProgress />
       ) : error ? (
@@ -407,7 +443,7 @@ export default function Dashboard({ onLogout }) {
           <AttendanceTable 
             logs={user && user.is_admin ? paginatedAttendance : attendance} 
             isAdmin={user && user.is_admin} 
-            dateCol={filterDate} 
+            dateCol={mode === 'delete' ? deleteDate : filterDate} 
           />
           {user && user.is_admin && (
             <Box display="flex" justifyContent="center" mt={2}>
@@ -433,7 +469,6 @@ export default function Dashboard({ onLogout }) {
         </>
       )}
 
-      {/* Notification snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={4000}

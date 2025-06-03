@@ -1,4 +1,3 @@
-
 import { fetchWithAuth } from '../api/token';
 
 const API_BASE = 'http://localhost:9123/v1/user';
@@ -53,7 +52,7 @@ export async function changePassword(currentPassword, newPassword, confirmPasswo
 }
 
 export async function getUserByEmpId(emp_id) {
-  const res = await fetchWithAuth(`${API_BASE}/users/by-empid/${emp_id}`);
+  const res = await fetchWithAuth(`${API_BASE}/users/by-emp_id/${emp_id}`);
   if (!res.ok) throw new Error('Failed to fetch user by emp_id');
   return res.json();
 }
@@ -85,4 +84,3 @@ export async function resetPassword(token, newPassword) {
   }
   return res.json();
 }
-

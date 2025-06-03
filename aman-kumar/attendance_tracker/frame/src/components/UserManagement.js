@@ -179,8 +179,9 @@ export default function UserManagement({ onLogout }) {
     }
     setSearchLoading(true);
     setSearchError('');
+    const isNumeric = /^\d+$/.test(searchUsername.trim());
     try {
-      const user = await getUserByUsername(searchUsername.trim());
+      const user = isNumeric ? await getUserByEmpId(searchUsername.trim()) : await getUserByUsername(searchUsername.trim());
       setUsers(user ? [user] : []);
       setPage(1);
     } catch {

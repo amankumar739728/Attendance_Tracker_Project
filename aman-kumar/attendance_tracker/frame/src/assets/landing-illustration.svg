@@ -1,0 +1,11 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" rx="32" fill="#EEF2FF"/>
+  <ellipse cx="200" cy="220" rx="120" ry="30" fill="#C7D2FE"/>
+  <rect x="110" y="80" width="180" height="100" rx="18" fill="#6366F1"/>
+  <rect x="130" y="100" width="140" height="60" rx="10" fill="#FFF"/>
+  <rect x="150" y="120" width="100" height="20" rx="6" fill="#A5B4FC"/>
+  <circle cx="200" cy="170" r="12" fill="#6366F1"/>
+  <rect x="170" y="190" width="60" height="10" rx="5" fill="#A5B4FC"/>
+  <text x="200" y="60" text-anchor="middle" fill="#6366F1" font-size="28" font-family="Segoe UI, Arial" font-weight="bold">Attendance</text>
+  <text x="200" y="85" text-anchor="middle" fill="#6366F1" font-size="18" font-family="Segoe UI, Arial">Tracker</text>
+</svg>

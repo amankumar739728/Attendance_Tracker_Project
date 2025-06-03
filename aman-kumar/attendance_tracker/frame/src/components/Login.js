@@ -16,6 +16,7 @@ import {
   VisibilityOff,
   DarkMode,
   LightMode,
+  Home,
 } from '@mui/icons-material';
 import { login } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -111,8 +112,21 @@ export default function Login({ onLogin }) {
             color: darkMode ? '#fff' : 'text.primary',
             borderRadius: 4,
             boxShadow: 8,
+            position: 'relative',
           }}
         >
+          <IconButton
+            aria-label="home"
+            onClick={() => navigate('/')}
+            sx={{
+              position: 'absolute',
+              top: 28,
+              right: 38,
+              color: darkMode ? '#a78bfa' : 'inherit',
+            }}
+          >
+            <Home />
+          </IconButton>
           <Typography
             variant="h4"
             align="center"
