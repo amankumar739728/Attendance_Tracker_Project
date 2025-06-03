@@ -3,7 +3,7 @@ alembic
 annotated-types
 anyio
 APScheduler
-bcrypt
+bcrypt==3.2.2
 blinker
 click
 colorama
