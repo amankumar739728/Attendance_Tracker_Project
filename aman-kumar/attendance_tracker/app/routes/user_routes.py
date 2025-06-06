@@ -7,7 +7,7 @@ from configs.database import db_session
 from typing import List
 from pydantic import BaseModel
 from fastapi.security import HTTPBearer
-from model.schema import (CreateUserRequest,LoginRequest, LoginRequestRoot, UpdateUserRequest, UserOut, AccessLogIn, AccessLogOut,AccessLogUpdate,TokenRefreshRequest,TokenRefreshResponse,ChangePasswordRequest,ForgotPasswordRequest,ResetPasswordRequest)
+from model.schema import (CreateUserRequest,LoginRequest, LoginRequestRoot, UpdateUserRequest, UserOut, AccessLogIn, AccessLogOut,AccessLogUpdate,TokenRefreshRequest,TokenRefreshResponse,ChangePasswordRequest,ForgotPasswordRequest,ResetPasswordRequest,ChatbotRequest,ChatbotResponse)
 from datetime import datetime, date, timedelta
 from fastapi import Body, Query
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -38,6 +38,56 @@ def admin_required(current_user: User = Depends(get_current_user)):
     if not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
     return current_user
+
+@router.post("/chatbot/message", response_model=ChatbotResponse, tags=["Chatbot"])
+def chatbot_message(request: ChatbotRequest, current_user: User = Depends(get_current_user)):
+    user_message = request.message.strip().lower()
+    username = current_user.username
+    emp_id = current_user.emp_id
+
+    # Basic greeting
+    if user_message in ["hi", "hello", "hey"]:
+        return ChatbotResponse(
+            response=f"Hello {username}! How can I assist you with your attendance today?",
+            options=["Show attendance for today", "Show attendance for a particular day"]
+        )
+    # Who am I query
+    elif "who am i" in user_message:
+        return ChatbotResponse(
+            response=f"You are {username}, employee ID {emp_id}. How can I help you?",
+            options=["Back"]
+        )
+    # Attendance query
+    elif "attendance" in user_message:
+        return ChatbotResponse(
+            response="Please choose an option:",
+            options=["Show attendance for today", "Show attendance for a particular day"]
+        )
+    # Handle option selection
+    elif user_message == "show attendance for today":
+        # Fetch today's attendance for the user
+        today_str = datetime.utcnow().strftime("%Y-%m-%d")
+        logs = db_session.query(AccessLog).filter(
+            AccessLog.emp_id == emp_id,
+            AccessLog.timestamp.between(f"{today_str} 00:00:00", f"{today_str} 23:59:59")
+        ).order_by(AccessLog.timestamp).all()
+        if not logs:
+            return ChatbotResponse(response="No attendance records found for today.", options=[])
+        response_lines = [f"Attendance records for today ({today_str}):"]
+        for log in logs:
+            time_str = log.timestamp.strftime("%H:%M:%S")
+            response_lines.append(f"{log.action} at {time_str}")
+        return ChatbotResponse(response="\n".join(response_lines), options=[])
+    elif user_message == "show attendance for a particular day":
+        return ChatbotResponse(
+            response="Please enter the date in YYYY-MM-DD format.",
+            options=[]
+        )
+    else:
+        return ChatbotResponse(
+            response="Sorry, I didn't understand that. You can say 'Hi', ask 'Who am I', or ask about your attendance.",
+            options=[]
+        )
 
 @router.post("/register", status_code=status.HTTP_201_CREATED,tags=["Auth"])
 def register(request: CreateUserRequest):
