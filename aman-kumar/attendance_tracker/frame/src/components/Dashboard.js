@@ -10,6 +10,7 @@ import MuiAlert from '@mui/material/Alert';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserUpdate } from './UserUpdateContext';
+import Chatbot from './Chatbot';
 
 export default function Dashboard({ onLogout }) {
   const [user, setUser] = useState(null);
@@ -485,6 +486,7 @@ export default function Dashboard({ onLogout }) {
           {notification.message}
         </MuiAlert>
       </Snackbar>
+      <Chatbot />
     </Box>
   );
 }
