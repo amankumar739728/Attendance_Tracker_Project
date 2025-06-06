@@ -1,5 +1,5 @@
 from pydantic import BaseModel,EmailStr
-from typing import Optional
+from typing import Optional,List
 from datetime import datetime
 
 class CreateUserRequest(BaseModel):
@@ -76,3 +76,9 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+class ChatbotRequest(BaseModel):
+    message: str
+    
+class ChatbotResponse(BaseModel):
+    response: str
+    options: List[str] = []
