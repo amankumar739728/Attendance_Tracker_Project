@@ -222,7 +222,7 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
 
     return {
         "message": f"Password reset link sent to your email: {user.email}",
-        "reset_link": f"http://localhost:3000/reset-password?token={reset_token}"
+        "reset_link": f"https://attendance-tracker-project-ui.onrender.com/#/reset-password?token={reset_token}"
     }
     
 @router.post("/reset-password", tags=["Auth"])
