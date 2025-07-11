@@ -15,7 +15,7 @@ conf = ConnectionConfig(
 
 async def send_reset_email(email: str, token: str):
     """Function to send password reset email."""
-    reset_link = f"http://localhost:3000/reset-password?token={token}"
+    reset_link = f"https://attendance-tracker-project-ui.onrender.com/#/reset-password?token={token}"
     message = MessageSchema(
         subject="Password Reset Request",
         recipients=[email],
