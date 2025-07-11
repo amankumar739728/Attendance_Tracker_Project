@@ -17,6 +17,7 @@ from utils.jwt_utils import decode_token
 from configs.auth import hash_password,verify_password, validate_password_complexity
 from model.reset_password_email import send_reset_email
 import secrets
+import asyncio
 
 
 router = APIRouter(prefix="/v1/user")
@@ -38,6 +39,9 @@ def admin_required(current_user: User = Depends(get_current_user)):
     if not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
     return current_user
+
+def send_reset_email_background(email: str, token: str):
+    asyncio.create_task(send_reset_email(email, token))
 
 @router.post("/chatbot/message", response_model=ChatbotResponse, tags=["Chatbot"])
 def chatbot_message(request: ChatbotRequest, current_user: User = Depends(get_current_user)):
@@ -218,7 +222,7 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
     db_session.add(token_entry)
     db_session.commit()
 
-    background_tasks.add_task(send_reset_email, user.email, reset_token)
+    background_tasks.add_task(send_reset_email_background, user.email, reset_token)
 
     return {
         "message": f"Password reset link sent to your email: {user.email}",
