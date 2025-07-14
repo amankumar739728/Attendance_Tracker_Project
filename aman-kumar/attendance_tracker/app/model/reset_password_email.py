@@ -24,6 +24,6 @@ async def send_reset_email(email: str, token: str):
         )
         fm = FastMail(conf)
         await fm.send_message(message)
-        logger.info(f"Email successfully sent to {email}")
+        print(f"Email successfully sent to {email}")
     except Exception as e:
-        logger.error(f"Failed to send email to {email}: {str(e)}")
+        print(f"Failed to send email to {email}: {str(e)}")
