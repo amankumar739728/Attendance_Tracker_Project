@@ -14,14 +14,16 @@ conf = ConnectionConfig(
 
 
 async def send_reset_email(email: str, token: str):
-    """Function to send password reset email."""
-    reset_link = f"https://attendance-tracker-project-ui.onrender.com/#/reset-password?token={token}"
-    message = MessageSchema(
-        subject="Password Reset Request",
-        recipients=[email],
-        body=f"Click the link to reset your password: {reset_link}",
-        subtype="html"
-    )
-
-    fm = FastMail(conf)
-    await fm.send_message(message)
+    try:
+        reset_link = f"https://attendance-tracker-project-ui.onrender.com/#/reset-password?token={token}"
+        message = MessageSchema(
+            subject="Password Reset Request",
+            recipients=[email],
+            body=f"Click the link to reset your password: {reset_link}",
+            subtype="html"
+        )
+        fm = FastMail(conf)
+        await fm.send_message(message)
+        print(f"Email sent to {email}")  # For debugging
+    except Exception as e:
+        print(f"Failed to send email: {str(e)}")
