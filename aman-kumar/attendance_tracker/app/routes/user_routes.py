@@ -207,7 +207,7 @@ async def refresh_token(request: TokenRefreshRequest):
         )
         
 @router.post("/forgot-password", tags=["Auth"])
-def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
     user = db_session.query(User).filter_by(email=request.email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
